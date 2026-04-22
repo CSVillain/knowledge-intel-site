@@ -69,6 +69,9 @@
             --tracking-caps: .1em;
             --tracking-caps-wide: .14em;
             --tracking-caps-tight: .06em;
+            --hero-progress: 0;
+            --hero-shift: 0px;
+            --hero-glow-shift: 0px;
         }
 
         * {
@@ -96,6 +99,7 @@
             line-height: 1.75;
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
+            --hero-fade: calc(1 - min(var(--hero-progress), .92) * .82);
         }
 
         main {
@@ -152,16 +156,18 @@
             justify-content: space-between;
             padding: 0 48px;
             height: 54px;
-            background: rgba(6, 6, 8, .55);
-            backdrop-filter: blur(20px) saturate(160%);
-            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            background: linear-gradient(to bottom, rgba(6, 6, 8, .46), rgba(6, 6, 8, .18));
+            backdrop-filter: blur(16px) saturate(145%);
+            -webkit-backdrop-filter: blur(16px) saturate(145%);
             border-bottom: 1px solid transparent;
-            transition: border-color .4s, background .4s;
+            transition: border-color .4s, background .4s, backdrop-filter .4s;
         }
 
         nav.scrolled {
             border-color: rgba(255, 255, 255, .06);
-            background: rgba(6, 6, 8, .88);
+            background: rgba(6, 6, 8, .84);
+            backdrop-filter: blur(22px) saturate(165%);
+            -webkit-backdrop-filter: blur(22px) saturate(165%);
         }
 
         .nav-logo {
@@ -239,24 +245,44 @@
         /* ── HERO (viz canvas as background) ─────────────── */
         #hero {
             position: relative;
-            min-height: 78svh;
+            min-height: calc(100svh - 10px);
             display: flex;
             align-items: center;
-            padding: 72px 80px 76px;
+            padding: 96px 80px 92px;
             overflow: hidden;
             background: var(--black);
+            isolation: isolate;
         }
 
-        /* Vignette — grounds the text without hiding the field */
+        #hero::before {
+            content: "";
+            position: absolute;
+            inset: auto auto 8% -8%;
+            width: min(48vw, 700px);
+            height: min(34vw, 480px);
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 30% 50%, rgba(242, 236, 224, .18), rgba(242, 236, 224, .06) 28%, rgba(104, 124, 166, .03) 56%, transparent 74%);
+            filter: blur(18px);
+            opacity: calc(.86 - var(--hero-progress) * .44);
+            transform: translate3d(0, calc(var(--hero-shift) * -.24), 0);
+            pointer-events: none;
+            z-index: 0;
+        }
+
         #hero::after {
             content: "";
             position: absolute;
             inset: 0;
             pointer-events: none;
             background:
-                radial-gradient(circle at 50% 54%, rgba(6, 6, 8, .14) 0%, rgba(6, 6, 8, .48) 36%, rgba(6, 6, 8, .82) 76%, rgba(6, 6, 8, .94) 100%),
-                linear-gradient(to bottom, rgba(6, 6, 8, .74) 0%, rgba(6, 6, 8, .18) 24%, rgba(6, 6, 8, .72) 100%),
-                linear-gradient(to right, rgba(6, 6, 8, .58) 0%, rgba(6, 6, 8, .08) 42%, rgba(6, 6, 8, .08) 58%, rgba(6, 6, 8, .58) 100%);
+                radial-gradient(circle at 72% 46%, rgba(140, 168, 222, .12) 0%, rgba(6, 6, 8, 0) 24%),
+                radial-gradient(circle at 24% 70%, rgba(246, 242, 232, .08) 0%, rgba(6, 6, 8, 0) 28%),
+                radial-gradient(circle at 56% 48%, rgba(6, 6, 8, .08) 0%, rgba(6, 6, 8, .42) 34%, rgba(6, 6, 8, .88) 78%, rgba(6, 6, 8, .96) 100%),
+                linear-gradient(to bottom, rgba(6, 6, 8, .72) 0%, rgba(6, 6, 8, .20) 24%, rgba(6, 6, 8, .78) 100%),
+                linear-gradient(to right, rgba(6, 6, 8, .80) 0%, rgba(6, 6, 8, .30) 28%, rgba(6, 6, 8, .10) 54%, rgba(6, 6, 8, .58) 100%);
+            opacity: var(--hero-fade);
+            transition: opacity .2s linear;
         }
 
         #viz-canvas {
@@ -268,42 +294,49 @@
 
         .hero-inner {
             position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 18px;
+            z-index: 2;
+            display: grid;
+            align-items: end;
+            justify-items: start;
             width: 100%;
-            max-width: 980px;
+            max-width: 1320px;
             margin: 0 auto;
-            text-align: center;
+            min-height: min(78svh, 820px);
         }
 
         .hero-copy {
-            width: 100%;
+            width: min(100%, 560px);
             display: grid;
-            justify-items: center;
-            gap: 18px;
+            justify-items: start;
+            gap: 20px;
+            padding: 0 0 10px;
+            transform: translate3d(0, calc(var(--hero-shift) * -.55), 0);
+            transition: transform .2s linear;
+        }
+
+        .hero-kicker {
+            font-family: var(--font-mono);
+            font-size: var(--type-label);
+            font-weight: 500;
+            letter-spacing: var(--tracking-caps-wide);
+            text-transform: uppercase;
+            color: rgba(241, 238, 232, .54);
         }
 
         .hero-h1 {
             font-family: var(--font-display);
-            font-size: 68px;
+            font-size: clamp(78px, 9vw, 144px);
             font-weight: 800;
-            line-height: 1.02;
+            line-height: .95;
             letter-spacing: 0;
             display: grid;
-            justify-items: center;
-            justify-content: center;
-            align-items: baseline;
-            column-gap: .18em;
-            row-gap: .02em;
-            max-width: 760px;
+            justify-items: start;
+            justify-content: start;
+            row-gap: .05em;
+            max-width: 7ch;
             margin-bottom: 0;
-            opacity: 1;
             color: var(--text-hero);
-            text-shadow: 0 2px 30px rgba(0, 0, 0, .72);
+            text-shadow: 0 18px 54px rgba(0, 0, 0, .72);
         }
 
         .hero-h1-static {
@@ -409,7 +442,18 @@
             -webkit-text-fill-color: var(--text-hero);
             filter: none !important;
             margin-left: 0;
-            text-shadow: 0 2px 30px rgba(0, 0, 0, .72);
+            text-shadow: 0 18px 54px rgba(0, 0, 0, .72);
+        }
+
+        .hero-lead {
+            max-width: 18ch;
+            font-family: var(--font-display);
+            font-size: clamp(24px, 2.35vw, 36px);
+            font-weight: 500;
+            line-height: 1.08;
+            letter-spacing: -.02em;
+            color: rgba(246, 242, 232, .96);
+            text-wrap: balance;
         }
 
         @keyframes chromeSweep {
@@ -445,23 +489,42 @@
         }
 
         .hero-sub {
-            font-size: 18px;
-            color: rgba(241, 238, 232, .82);
-            width: min(100%, 620px);
+            font-size: 17px;
+            color: rgba(241, 238, 232, .72);
+            width: min(100%, 34ch);
             margin: 0;
-            line-height: 1.65;
-            opacity: 1;
-            text-wrap: balance;
+            line-height: 1.58;
+            text-wrap: pretty;
         }
 
         .hero-btns {
             display: flex;
             gap: 16px;
             flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 4px;
-            width: 100%;
-            opacity: 1;
+            justify-content: flex-start;
+            margin-top: 8px;
+            width: auto;
+        }
+
+        .hero-foot {
+            display: grid;
+            gap: 8px;
+            max-width: 28ch;
+            margin-top: 10px;
+        }
+
+        .hero-foot-label {
+            font-family: var(--font-mono);
+            font-size: var(--type-label);
+            letter-spacing: var(--tracking-caps);
+            text-transform: uppercase;
+            color: rgba(241, 238, 232, .46);
+        }
+
+        .hero-foot-copy {
+            font-size: 14px;
+            line-height: 1.55;
+            color: rgba(241, 238, 232, .6);
         }
 
         /* Buttons */
@@ -525,16 +588,15 @@
         /* Scroll cue */
         .scroll-cue {
             position: absolute;
-            bottom: 28px;
-            left: 50%;
-            transform: translateX(-50%);
+            right: 80px;
+            bottom: 34px;
             z-index: 2;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 8px;
-            opacity: 0;
-            animation: fadeUp .5s 1.6s forwards;
+            opacity: .82;
+            transform: translate3d(0, calc(var(--hero-shift) * -.16), 0);
         }
 
         .scroll-cue-label {
@@ -548,12 +610,12 @@
 
         .scroll-cue-line {
             width: 1px;
-            height: 32px;
-            background: linear-gradient(to bottom, rgba(255, 255, 255, .25), transparent);
+            height: 52px;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, .32), transparent);
         }
 
         /* ── SECTION SHARED ──────────────────────────────── */
-        section:not(#hero) {
+        section:not(#hero):not(#hero-bridge) {
             padding: 120px 80px;
             background: var(--black);
         }
@@ -578,6 +640,63 @@
             max-width: 480px;
             margin-bottom: 56px;
             line-height: 1.75;
+        }
+
+        /* ── HERO BRIDGE ────────────────────────────────── */
+        #hero-bridge {
+            position: relative;
+            padding: 28px 80px 72px;
+            background:
+                linear-gradient(to bottom, rgba(6, 6, 8, 0), rgba(6, 6, 8, .98) 48%),
+                radial-gradient(circle at 68% 0%, rgba(116, 143, 194, .08), transparent 26%),
+                var(--black);
+            overflow: hidden;
+        }
+
+        #hero-bridge::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(to bottom, rgba(255, 255, 255, .08), transparent 26%),
+                radial-gradient(ellipse at 50% 0%, rgba(241, 238, 232, .04), transparent 52%);
+            opacity: calc(.88 - min(var(--hero-progress), .88) * .42);
+        }
+
+        .bridge-inner {
+            position: relative;
+            z-index: 1;
+            max-width: 1140px;
+            margin: 0 auto;
+            display: grid;
+            gap: 22px;
+        }
+
+        .bridge-kicker {
+            font-family: var(--font-mono);
+            font-size: var(--type-label);
+            letter-spacing: var(--tracking-caps-wide);
+            text-transform: uppercase;
+            color: rgba(241, 238, 232, .46);
+        }
+
+        .bridge-statement {
+            max-width: 16ch;
+            font-family: var(--font-display);
+            font-size: clamp(34px, 5vw, 62px);
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -.03em;
+            color: rgba(246, 242, 232, .94);
+            text-wrap: balance;
+        }
+
+        .bridge-copy {
+            max-width: 42ch;
+            font-size: 16px;
+            line-height: 1.65;
+            color: rgba(236, 238, 242, .64);
         }
 
         /* ── PROBLEM ─────────────────────────────────────── */
@@ -681,7 +800,7 @@
         .problem-header {
             position: relative;
             z-index: 3;
-            max-width: 740px;
+            max-width: 920px;
             padding: clamp(46px, 6vw, 76px) clamp(28px, 6vw, 86px) 0;
         }
 
@@ -692,7 +811,7 @@
         }
 
         .problem-header .section-sub {
-            max-width: 650px;
+            max-width: 760px;
             margin-bottom: 0;
             color: rgba(236, 238, 242, .72);
         }
@@ -724,21 +843,24 @@
 
         .problem-content-area {
             position: absolute;
-            top: clamp(340px, 43svh, 440px);
             right: clamp(28px, 6vw, 86px);
             left: clamp(28px, 6vw, 86px);
+            bottom: clamp(42px, 6vh, 76px);
             z-index: 4;
             display: grid;
-            grid-template-columns: minmax(280px, 580px) max-content;
-            gap: 28px 48px;
+            grid-template-columns: minmax(360px, 680px) max-content;
+            column-gap: 48px;
             align-items: end;
             min-height: 0;
             padding: 0;
         }
 
         .problem-slides {
+            grid-column: 1;
+            grid-row: 1;
+            position: relative;
             display: grid;
-            min-height: 190px;
+            min-height: 226px;
         }
 
         .problem-slide {
@@ -797,6 +919,9 @@
         }
 
         .problem-admissibility-nav {
+            grid-column: 2;
+            grid-row: 1;
+            align-self: end;
             position: relative;
             z-index: 5;
             display: flex;
@@ -805,7 +930,7 @@
             gap: 12px;
             width: max-content;
             height: 44px;
-            margin: 0 0 4px;
+            margin: 0;
             padding: 0;
             border: 0;
             background: transparent;
@@ -900,7 +1025,10 @@
 
         /* ── EVIDENCE ────────────────────────────────────── */
         #evidence {
-            background: var(--black);
+            background:
+                radial-gradient(circle at 12% 18%, rgba(255, 255, 255, .035), transparent 22%),
+                linear-gradient(to bottom, rgba(255, 255, 255, .012), transparent 22%),
+                var(--black);
             position: relative;
         }
 
@@ -1031,7 +1159,10 @@
 
         /* ── FRAMEWORK ───────────────────────────────────── */
         #framework {
-            background: var(--black);
+            background:
+                radial-gradient(circle at 84% 24%, rgba(200, 214, 255, .05), transparent 24%),
+                linear-gradient(to bottom, rgba(255, 255, 255, .01), transparent 18%),
+                var(--black);
             position: relative;
         }
 
@@ -2047,21 +2178,33 @@
                 padding: 0 24px
             }
 
+            .nav-cta {
+                padding: 7px 12px;
+                min-height: 36px;
+                font-size: 12px;
+            }
+
             #hero {
-                min-height: 76svh;
-                padding: 86px 24px 54px
+                min-height: calc(100svh - 12px);
+                padding: 88px 24px 88px
             }
 
             .hero-inner {
-                gap: 20px
+                min-height: min(76svh, 720px);
             }
 
             .hero-copy {
                 gap: 16px;
+                width: min(100%, 460px);
             }
 
             .hero-h1 {
-                font-size: 56px;
+                font-size: clamp(58px, 11vw, 98px);
+            }
+
+            .hero-lead {
+                font-size: 24px;
+                max-width: 16ch;
             }
 
             .section-h2,
@@ -2082,8 +2225,17 @@
                 font-size: 96px;
             }
 
-            section:not(#hero) {
+            section:not(#hero):not(#hero-bridge) {
                 padding: 72px 24px
+            }
+
+            #hero-bridge {
+                padding: 16px 24px 54px;
+            }
+
+            .bridge-statement {
+                max-width: 15ch;
+                font-size: clamp(30px, 7vw, 48px);
             }
 
             #problem {
@@ -2126,15 +2278,21 @@
                 inset: auto;
                 display: grid;
                 grid-template-columns: 1fr;
+                grid-template-rows: minmax(216px, auto) auto;
                 gap: 22px;
                 padding: 0 24px 34px;
             }
 
             .problem-slides {
-                min-height: 198px;
+                grid-column: 1;
+                grid-row: 1;
+                min-height: 216px;
             }
 
             .problem-admissibility-nav {
+                grid-column: 1;
+                grid-row: 2;
+                align-self: start;
                 display: grid;
                 grid-template-columns: 44px minmax(0, 1fr) 44px;
                 align-items: center;
@@ -2301,24 +2459,52 @@
 
             .hero-h1 {
                 max-width: 100%;
-                font-size: 38px;
-                line-height: 1.08;
+                font-size: clamp(44px, 14vw, 72px);
+                line-height: .96;
+            }
+
+            .hero-lead {
+                font-size: 21px;
+                max-width: 14ch;
             }
 
             .hero-sub {
-                width: min(100%, 30ch);
+                width: min(100%, 28ch);
                 font-size: 16px;
                 line-height: 1.55;
             }
 
+            .hero-foot {
+                display: none;
+            }
+
             .hero-btns {
                 gap: 10px;
+                width: 100%;
             }
 
             .btn-primary,
             .btn-ghost {
                 width: 100%;
                 padding: 13px 18px;
+            }
+
+            .scroll-cue {
+                display: none;
+            }
+
+            #hero-bridge {
+                padding: 10px 24px 42px;
+            }
+
+            .bridge-statement {
+                font-size: 30px;
+                line-height: 1.02;
+            }
+
+            .bridge-copy {
+                font-size: 15px;
+                line-height: 1.58;
             }
 
             .section-h2,
@@ -2377,7 +2563,7 @@
             }
 
             .problem-slides {
-                min-height: 166px;
+                min-height: 188px;
             }
 
             .problem-point-copy {
@@ -2536,12 +2722,18 @@
 
             <div class="hero-inner">
                 <div class="hero-copy" id="hero-main">
+                    <p class="hero-kicker">Decision Theatre</p>
                     <h1 class="hero-h1"><span class="hero-h1-static">Knowledge</span><span
                             class="hero-h1-chrome">Intelligence</span></h1>
-                    <p class="hero-sub">Make trusted knowledge usable before decisions are made.</p>
+                    <p class="hero-lead">Turn unstable information into decision-ready confidence.</p>
+                    <p class="hero-sub">Make trusted knowledge usable before decisions are made, not after risk has already moved.</p>
                     <div class="hero-btns">
                         <a href="#cta" class="btn-primary">Request the Whitepaper</a>
                         <a href="#problem" class="btn-ghost">Explore the Framework</a>
+                    </div>
+                    <div class="hero-foot" aria-label="Hero context">
+                        <span class="hero-foot-label">What Changes</span>
+                        <p class="hero-foot-copy">Confidence becomes visible at the point of action, so decisions inherit quality, relevance, and traceability in real time.</p>
                     </div>
                 </div>
             </div>
@@ -2549,6 +2741,14 @@
             <div class="scroll-cue">
                 <span class="scroll-cue-label">Scroll</span>
                 <div class="scroll-cue-line"></div>
+            </div>
+        </section>
+
+        <section id="hero-bridge" aria-labelledby="bridge-title">
+            <div class="bridge-inner">
+                <p class="bridge-kicker">The Real Gap</p>
+                <h2 class="bridge-statement" id="bridge-title">Most organisations do not have an information problem. They have a confidence problem.</h2>
+                <p class="bridge-copy">The issue is not whether knowledge exists. It is whether anything in the operating environment can tell a team what should be trusted, used, reviewed, or withheld before a live decision lands.</p>
             </div>
         </section>
 
@@ -2895,6 +3095,40 @@
             };
 
             function rgb(c, a) { return `rgba(${c[0]},${c[1]},${c[2]},${a})` }
+            function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+            function focalPoint() {
+                return {
+                    x: W * (window.innerWidth < 900 ? .68 : .74),
+                    y: H * (window.innerWidth < 900 ? .38 : .48)
+                };
+            }
+            function drawFieldBackdrop(intro, surge, settle) {
+                const focal = focalPoint();
+                const fieldGlow = ctx.createRadialGradient(focal.x, focal.y, 0, focal.x, focal.y, Math.max(W, H) * .44);
+                fieldGlow.addColorStop(0, `rgba(170,198,255,${.10 + surge * .16})`);
+                fieldGlow.addColorStop(.2, `rgba(112,146,214,${.06 + surge * .10})`);
+                fieldGlow.addColorStop(.56, `rgba(42,56,86,${.08 + settle * .06})`);
+                fieldGlow.addColorStop(1, 'rgba(6,6,8,0)');
+                ctx.fillStyle = fieldGlow;
+                ctx.fillRect(0, 0, W, H);
+
+                const floorGlow = ctx.createRadialGradient(W * .26, H * .82, 0, W * .26, H * .82, Math.max(W, H) * .36);
+                floorGlow.addColorStop(0, `rgba(246,242,232,${.05 + intro * .05})`);
+                floorGlow.addColorStop(.42, `rgba(170,176,192,${.02 + intro * .03})`);
+                floorGlow.addColorStop(1, 'rgba(6,6,8,0)');
+                ctx.fillStyle = floorGlow;
+                ctx.fillRect(0, 0, W, H);
+            }
+            function drawRevealEvent(surge) {
+                if (surge <= .01) return;
+                const focal = focalPoint();
+                const ring = Math.max(24, Math.min(W, H) * (.08 + surge * .18));
+                ctx.beginPath();
+                ctx.arc(focal.x, focal.y, ring, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(235,241,255,${(1 - surge) * .12})`;
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
+            }
 
             function resize() {
                 dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 900 ? 1.25 : 1.5);
@@ -2995,6 +3229,7 @@
                     flareTimer,
                     flareA: 0,           // current flare brightness boost
                     flaring: false,
+                    revealDelay: Math.floor(rnd() * 150),
                 };
             }
 
@@ -3012,13 +3247,17 @@
             }
 
             function init() {
+                frame = 0;
+                fieldAge = 0;
+                bursts = [];
+                pulses = [];
                 nodes = [];
                 for (let i = 0; i < maxNodes; i++) {
                     const n = makeNode();
-                    n.age = 150 + Math.random() * 250;
-                    n.alpha = .5 + Math.random() * .5;
-                    n.crystallized = true;
-                    n.size = n.targetSize;
+                    n.crystallized = Math.random() > .46;
+                    n.age = n.crystallized ? 120 + Math.random() * 160 : Math.random() * 120;
+                    n.alpha = 0;
+                    n.size = n.crystallized ? n.targetSize * .32 : 1.1;
                     n.flashTimer = Math.floor(Math.random() * 500);
                     n.flareTimer = n.score >= .95 ? Math.floor(Math.random() * 600) : Infinity;
                     n.wobblePhase = Math.random() * Math.PI * 2;
@@ -3032,9 +3271,15 @@
                 ctx.clearRect(0, 0, W, H);
                 frame++;
                 fieldAge++;
+                const intro = clamp(frame / 150, 0, 1);
+                const surge = clamp((frame - 50) / 125, 0, 1);
+                const settle = clamp((frame - 190) / 280, 0, 1);
+
+                drawFieldBackdrop(intro, surge, settle);
+                drawRevealEvent(surge);
 
                 // Spawn new drifting nodes gradually
-                if (frame % 34 === 0 && nodes.length < maxNodes) nodes.push(makeNode());
+                if (frame % 40 === 0 && nodes.length < maxNodes) nodes.push(makeNode());
 
                 // Periodic pulse from the validated cluster centroid
                 if (frame % 360 === 0) addPulse();
@@ -3048,7 +3293,7 @@
                         const dx = a.x - b.x, dy = a.y - b.y;
                         const d = Math.sqrt(dx * dx + dy * dy);
                         if (d < 88) {
-                            const fade = (1 - d / 88) * Math.min(a.alpha, b.alpha);
+                            const fade = (1 - d / 88) * Math.min(a.alpha, b.alpha) * (.25 + intro * .75);
                             const lg = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
                             lg.addColorStop(0, `rgba(255,255,255,${fade * .08})`);
                             lg.addColorStop(0.15, rgb(C.validated, fade * .05));
@@ -3071,10 +3316,32 @@
                         const d = Math.sqrt(dx * dx + dy * dy);
                         if (d < 56) {
                             ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
-                            ctx.strokeStyle = rgb(C.review, (1 - d / 56) * .028 * Math.min(a.alpha, b.alpha));
+                            ctx.strokeStyle = rgb(C.review, (1 - d / 56) * .028 * Math.min(a.alpha, b.alpha) * (.2 + intro * .8));
                             ctx.lineWidth = .3; ctx.stroke();
                         }
                     }
+                }
+
+                const focal = focalPoint();
+                const anchors = nodes.filter(n => n.crystallized && n.score >= .95).slice(0, window.innerWidth < 900 ? 9 : 16);
+                if (anchors.length) {
+                    anchors.forEach((n, index) => {
+                        const tether = clamp((surge - index * .025) * 1.28, 0, .8);
+                        if (tether <= .01) return;
+                        const grad = ctx.createLinearGradient(n.x, n.y, focal.x, focal.y);
+                        grad.addColorStop(0, `rgba(255,255,255,${tether * .05})`);
+                        grad.addColorStop(.45, rgb(C.validated, tether * .04));
+                        grad.addColorStop(1, `rgba(214,228,255,${tether * .12})`);
+                        ctx.beginPath();
+                        ctx.moveTo(n.x, n.y);
+                        ctx.lineTo(
+                            focal.x + Math.cos(index * .7 + frame * .01) * (8 + index * .8),
+                            focal.y + Math.sin(index * .5 + frame * .008) * (10 + index * .7)
+                        );
+                        ctx.strokeStyle = grad;
+                        ctx.lineWidth = .45 + tether * .55;
+                        ctx.stroke();
+                    });
                 }
 
                 // ── Pulses — stellar shockwave expanding outward ──
@@ -3112,6 +3379,7 @@
                 nodes.forEach(n => {
                     n.age++;
                     n.alpha = Math.min(1, n.alpha + (n.crystallized ? .028 : .012));
+                    const revealGate = clamp((frame - n.revealDelay) / 90, 0, 1);
 
                     if (!n.crystallized) {
                         // Drift freely until crystallisation age
@@ -3188,7 +3456,7 @@
                     const flareBoost = n.flareA * 0.5;
                     const r = n.size * (breathe + flareBoost);
                     const isRaw = !n.crystallized;
-                    const baseA = (isRaw ? al * 0.15 : al * 0.72) * (1 + n.flareA * 0.42);
+                    const baseA = (isRaw ? al * 0.15 : al * 0.72) * (1 + n.flareA * 0.42) * revealGate * (.38 + intro * .62);
 
                     // ── 1: Nebula haze ────────────────────────────────
                     const hazeScale = state === 'validated' ? 16 + t * 6
@@ -3301,6 +3569,7 @@
 
             function drawStatic() {
                 ctx.clearRect(0, 0, W, H);
+                drawFieldBackdrop(1, 1, 1);
                 nodes.forEach(n => {
                     const state = stateOf(n.score);
                     const color = C[state];
@@ -3374,14 +3643,48 @@
             }
         })();
 
-        // ── NAV SCROLL ────────────────────────────────────
-        window.addEventListener('scroll', () => {
-            document.getElementById('nav').classList.toggle('scrolled', scrollY > 80);
-        }, { passive: true });
+        // ── NAV + HERO SCROLL STATE ───────────────────────
+        (function () {
+            const nav = document.getElementById('nav');
+            const hero = document.getElementById('hero');
+            const root = document.documentElement;
+            if (!nav || !hero) return;
+
+            let ticking = false;
+            function update() {
+                ticking = false;
+                const y = window.scrollY || 0;
+                nav.classList.toggle('scrolled', y > 80);
+                const heroSpan = Math.max(1, hero.offsetHeight * .92);
+                const progress = Math.max(0, Math.min(1, y / heroSpan));
+                root.style.setProperty('--hero-progress', progress.toFixed(4));
+                root.style.setProperty('--hero-shift', `${Math.round(progress * 72)}px`);
+                root.style.setProperty('--hero-glow-shift', `${Math.round(progress * 110)}px`);
+            }
+
+            update();
+            window.addEventListener('scroll', () => {
+                if (ticking) return;
+                ticking = true;
+                requestAnimationFrame(update);
+            }, { passive: true });
+            window.addEventListener('resize', update, { passive: true });
+        })();
 
         // ── COUNT-UP UTILITY ──────────────────────────────
         function countUp(el, target, suffix, duration, delay) {
-            el.textContent = target + suffix;
+            if (prefersReducedMotion.matches || duration <= 0) {
+                el.textContent = target + suffix;
+                return;
+            }
+            setTimeout(() => {
+                const t0 = performance.now();
+                (function step(now) {
+                    const t = Math.min((now - t0) / duration, 1);
+                    el.textContent = Math.round((1 - Math.pow(1 - t, 3)) * target) + suffix;
+                    if (t < 1) requestAnimationFrame(step);
+                })(performance.now());
+            }, delay);
         }
 
         // ── SCROLL-TRIGGERED ANIMATIONS ───────────────────
@@ -3436,11 +3739,14 @@
             const graph = { nodes: [], edges: [] };
             let particles = [];
 
-            let asteroids = [];
-            let npcShips = [];
-            let ourShip = null;
-            let explosions = [];
-            let scrollOffset = 0;
+            let falseConfidenceParticles = [];
+            let falseConfidenceStreams = [];
+            let falseConfidenceRipples = [];
+            let falseConfidenceShards = [];
+            let falseConfidencePhase = 'idle';
+            let falseConfidencePhaseStart = 0;
+            let falseConfidenceLastTrigger = 0;
+            let falseConfidenceNextTriggerDelay = 2600;
 
             // Preload sprite images - PIXEL ART SPACESHIPS
             const spriteImages = {};
@@ -3486,6 +3792,7 @@
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
                 buildGraph();
                 seedParticles();
+                if (stage === 3) initFalseConfidenceField();
                 if (reduce) drawStatic();
             }
 
@@ -3585,59 +3892,57 @@
             function confidenceScene(ts = 0) {
                 const small = W < 520;
                 const scale = Math.min(W, H);
-                const phase = reduce ? 0 : ts * .00048;
-                const breath = reduce ? 0 : Math.sin(ts * .00072) * scale * .006;
+                const phase = reduce ? 0 : ts * .00056;
+                const breath = reduce ? 0 : Math.sin(ts * .00086) * scale * .010;
                 return {
                     small,
                     phase,
-                    x: W * (small ? .88 : .760),
-                    y: H * (small ? .43 : .485),
-                    r: scale * (small ? .255 : .265) + breath
+                    x: W * (small ? .83 : .765),
+                    y: H * (small ? .38 : .49),
+                    r: scale * (small ? .245 : .245) + breath
                 };
             }
 
             function confidenceRouteTarget(scene, p, i) {
                 if (p.route === 0) {
                     return {
-                        x: scene.x + scene.r * (1.22 + stable(i, 301) * .50),
-                        y: scene.y - scene.r * (.64 + stable(i, 302) * .38)
+                        x: scene.x + scene.r * (.98 + stable(i, 301) * .62),
+                        y: scene.y - scene.r * (.64 + stable(i, 302) * .34)
                     };
                 }
                 if (p.route === 1) {
                     return {
-                        x: scene.x + scene.r * (1.02 + stable(i, 303) * .42),
-                        y: scene.y + (stable(i, 304) - .5) * scene.r * .42
+                        x: scene.x + scene.r * (.82 + stable(i, 303) * .46),
+                        y: scene.y + (stable(i, 304) - .5) * scene.r * .34
                     };
                 }
                 return {
-                    x: scene.x + scene.r * (.58 + stable(i, 305) * .46),
-                    y: scene.y + scene.r * (.64 + stable(i, 306) * .44)
+                    x: scene.x + scene.r * (.34 + stable(i, 305) * .54),
+                    y: scene.y + scene.r * (.72 + stable(i, 306) * .40)
                 };
             }
 
-            function drawConfidenceBand(sx, sy, cx, cy, ex, ey, colourValue, width, alpha, highlight = true) {
+            function drawConfidenceBand(sx, sy, cx, cy, ex, ey, colourValue, width, alpha) {
                 ctx.save();
                 ctx.globalAlpha = alpha;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
                 ctx.shadowColor = colourValue;
-                ctx.shadowBlur = width * 1.25;
+                ctx.shadowBlur = width * 1.9;
                 ctx.strokeStyle = colourValue;
                 ctx.lineWidth = width;
                 ctx.beginPath();
                 ctx.moveTo(sx, sy);
                 ctx.quadraticCurveTo(cx, cy, ex, ey);
                 ctx.stroke();
-                if (highlight) {
-                    ctx.shadowBlur = 0;
-                    ctx.globalAlpha = alpha * .46;
-                    ctx.lineWidth = Math.max(.7, width * .16);
-                    ctx.strokeStyle = 'rgba(246,242,232,.62)';
-                    ctx.beginPath();
-                    ctx.moveTo(sx, sy);
-                    ctx.quadraticCurveTo(cx, cy, ex, ey);
-                    ctx.stroke();
-                }
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = alpha * .72;
+                ctx.lineWidth = Math.max(1, width * .22);
+                ctx.strokeStyle = 'rgba(246,242,232,.72)';
+                ctx.beginPath();
+                ctx.moveTo(sx, sy);
+                ctx.quadraticCurveTo(cx, cy, ex, ey);
+                ctx.stroke();
                 ctx.restore();
             }
 
@@ -3706,7 +4011,7 @@
                         : lane === 1
                             ? 'rgba(219,166,82,.125)'
                             : 'rgba(184,100,88,.095)';
-                    drawConfidenceBand(startX, startY, controlX, controlY, endX, endY, colourValue, r * (.010 + stable(i, 325) * .012), (.18 + stable(i, 326) * .14) * mobileRestraint, i % 5 === 0);
+                    drawConfidenceBand(startX, startY, controlX, controlY, endX, endY, colourValue, r * (.010 + stable(i, 325) * .012), (.18 + stable(i, 326) * .14) * mobileRestraint);
                 }
 
                 for (let i = 0; i < 180; i++) {
@@ -3846,8 +4151,7 @@
                             ey + offset * .36,
                             i % 3 === 0 ? route.glow : route.c,
                             r * route.width * (.62 + stable(i + routeIndex * 30, 362) * .62),
-                            intensity * (.12 + stable(i + routeIndex * 30, 363) * .16),
-                            i === 0
+                            intensity * (.12 + stable(i + routeIndex * 30, 363) * .16)
                         );
                     }
                 });
@@ -4162,7 +4466,9 @@
                 graph.nodes.forEach(n => {
                     const contextual = visual.window <= .05 || inWindow(n, box);
                     const pulse = reduce ? 1 : .82 + .18 * Math.sin(ts * .0018 + n.pulse);
-                    ctx.fillStyle = colour(n.q, pulse * (contextual ? .58 : .16));
+                    ctx.fillStyle = stage === 2
+                        ? contextThermalColour(n.x, n.y, pulse * (contextual ? .58 : .16), box)
+                        : colour(n.q, pulse * (contextual ? .58 : .16));
                     ctx.beginPath();
                     ctx.arc(n.x, n.y, n.r * (contextual ? 1.08 : .70), 0, Math.PI * 2);
                     ctx.fill();
@@ -4289,6 +4595,7 @@
             }
 
             function drawGate(ts, intensity) {
+                if (stage !== 3) return;
                 if (intensity <= .01) return;
                 drawConfidenceIris(ts, intensity);
             }
@@ -4319,6 +4626,7 @@
             }
 
             function drawSplit(ts, intensity) {
+                if (stage !== 3) return;
                 if (intensity <= .01) return;
                 drawConfidenceOutcomes(ts, intensity);
             }
@@ -4390,7 +4698,7 @@
                         p.vx += Math.sin(ts * (stage === 0 ? .0046 : .0036) + p.drift) * turbulence;
                         p.vy += Math.cos(ts * (stage === 0 ? .0041 : .0032) + p.drift) * turbulence;
                     }
-                    if (visual.gate > 0 && p.route === 2 && p.x > gateX - confidence.r * .48) {
+                    if (stage === 3 && visual.gate > 0 && p.route === 2 && p.x > gateX - confidence.r * .48) {
                         p.vx -= .036 * visual.gate;
                         p.vy *= .94;
                     }
@@ -4472,333 +4780,420 @@
                 signal *= reduce ? 0 : .90;
             }
 
-            function initAsteroidField() {
-                asteroids = [];
-                npcShips = [];
-                explosions = [];
-                scrollOffset = 0;
-
-                for (let i = 0; i < 35; i++) {
-                    const variant = i % 3;
-                    const r = 12 + stable(i, 100) * 24;
-                    asteroids.push({
-                        x: stable(i, 101) * W,
-                        y: stable(i, 102) * H,
-                        r,
-                        rotation: stable(i, 103) * Math.PI * 2,
-                        rotSpeed: (stable(i, 104) - .5) * .005,
-                        variant
-                    });
-                }
-
-                ourShip = {
-                    x: W * 0.4,
-                    y: H * .5,
-                    vy: 0,
-                    speed: W * 0.0004,
-                    trail: []
+            function makeFalseConfidenceParticle(i) {
+                const type = stable(i, 400) > .42 ? 'present' : 'untested';
+                const coreX = W * .67;
+                const coreY = H * .46;
+                return {
+                    type,
+                    x: W * (.18 + stable(i, 401) * .52),
+                    y: H * (.12 + stable(i, 402) * .70),
+                    baseX: W * (.18 + stable(i, 403) * .52),
+                    baseY: H * (.12 + stable(i, 404) * .70),
+                    vx: (stable(i, 405) - .5) * .18,
+                    vy: (stable(i, 406) - .5) * .10,
+                    pulse: stable(i, 407) * Math.PI * 2,
+                    pulseSpeed: .008 + stable(i, 408) * .022,
+                    size: type === 'present' ? 1.8 + stable(i, 409) * 2.8 : 1.1 + stable(i, 410) * 2.0,
+                    alpha: type === 'present' ? .54 + stable(i, 411) * .32 : .26 + stable(i, 412) * .24,
+                    targetX: coreX + (stable(i, 413) - .5) * W * .18,
+                    targetY: coreY + (stable(i, 414) - .5) * H * .16,
+                    ejectVx: 0,
+                    ejectVy: 0,
+                    ejected: false,
+                    vanish: 1,
+                    ignite: 0
                 };
             }
 
-            function drawAsteroidField(ts, intensity) {
-                if (!ourShip) initAsteroidField();
-
-                ctx.fillStyle = '#060608';
-                ctx.fillRect(0, 0, W, H);
-
-                scrollOffset = (scrollOffset + ourShip.speed * 16.67) % W;
-
-                drawStars(ts);
-                updateAndDrawAsteroids(ts);
-                updateAndDrawExplosions(ts);
-                updateAndDrawNPCShips(ts);
-                updateAndDrawOurShip(ts);
+            function initFalseConfidenceField() {
+                falseConfidenceParticles = Array.from({ length: W < 520 ? 180 : 260 }, (_, i) => makeFalseConfidenceParticle(i));
+                falseConfidenceStreams = Array.from({ length: 7 }, (_, i) => ({
+                    x: W * (.16 + stable(i, 420) * .48),
+                    y: H * (.14 + stable(i, 421) * .58),
+                    w: W * (.08 + stable(i, 422) * .18),
+                    alpha: .05 + stable(i, 423) * .075,
+                    drift: (stable(i, 424) - .5) * .12,
+                    tint: stable(i, 425) > .56 ? 'blue' : stable(i, 426) > .52 ? 'amber' : 'neutral'
+                }));
+                falseConfidenceRipples = [];
+                falseConfidenceShards = [];
+                falseConfidencePhase = 'idle';
+                falseConfidencePhaseStart = 0;
+                falseConfidenceLastTrigger = 0;
+                falseConfidenceNextTriggerDelay = 2200 + stable(W + H, 427) * 1800;
             }
 
-            function drawStars(ts) {
-                for (let layer = 0; layer < 2; layer++) {
-                    const speed = layer === 0 ? .0001 : .0003;
-                    const offset = (ts * speed) % W;
-                    const size = layer === 0 ? 1 : 2;
-                    const opacity = layer === 0 ? .4 : .7;
-
-                    for (let i = 0; i < 30; i++) {
-                        const x = (stable(i * 100 + layer, 200) * W - offset + W) % W;
-                        const y = stable(i * 100 + layer, 201) * H;
-                        ctx.fillStyle = `rgba(255,255,255,${opacity})`;
-                        ctx.beginPath();
-                        ctx.arc(x, y, size, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                }
-            }
-
-            function updateAndDrawAsteroids(ts) {
-                asteroids.forEach(ast => {
-                    ast.x = (ast.x - ourShip.speed * 16.67 + W) % W;
-                    ast.rotation += ast.rotSpeed;
-
-                    drawAsteroid(ast);
+            function triggerFalseConfidence(ts) {
+                falseConfidencePhase = 'converging';
+                falseConfidencePhaseStart = ts;
+                falseConfidenceLastTrigger = ts;
+                const coreX = W * .58;
+                const coreY = H * .49;
+                falseConfidenceParticles.forEach((p, i) => {
+                    p.targetX = coreX + (stable(i, 430) - .5) * W * .13;
+                    p.targetY = coreY + (stable(i, 431) - .5) * H * .11;
+                    p.ejected = false;
+                    p.vanish = 1;
+                    p.ignite = 0;
                 });
             }
 
-            function drawAsteroid(ast) {
-                ctx.save();
-                ctx.translate(ast.x, ast.y);
-                ctx.rotate(ast.rotation);
-
-                const verts = 7 + ast.variant;
-                const r = ast.r;
-                ctx.fillStyle = `rgb(${100 + ast.variant * 30},${90 + ast.variant * 20},${80 + ast.variant * 15})`;
-                ctx.beginPath();
-                for (let i = 0; i < verts; i++) {
-                    const angle = (i / verts) * Math.PI * 2;
-                    const radius = r * (.7 + stable(i * 1000 + ast.variant, 300) * .3);
-                    const x = Math.cos(angle) * radius;
-                    const y = Math.sin(angle) * radius;
-                    if (i === 0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
-                }
-                ctx.closePath();
-                ctx.fill();
-
-                ctx.strokeStyle = `rgba(150,140,130,.6)`;
-                ctx.lineWidth = 1;
-                ctx.stroke();
-
-                ctx.restore();
-            }
-
-            function updateAndDrawNPCShips(ts) {
-                const spawnRate = 3;
-                while (npcShips.length < spawnRate) {
-                    const id = npcShips.length + Math.floor(ts / 1000);
-                    const design = id % 3;
-                    const spawnY = H * (.15 + stable(id, 400) * .7);
-                    const speedMult = 3 + stable(id, 401) * 2.5;
-
-                    npcShips.push({
-                        id,
-                        x: W + 50,
-                        y: spawnY,
-                        vx: -(W * .001) * speedMult,
-                        vy: (stable(id, 402) - .5) * (W * .0002),
-                        design,
-                        w: 24 + stable(id, 403) * 8,
-                        h: 14 + stable(id, 404) * 6,
-                        trail: [],
-                        alive: true,
-                        explodeAt: 0,
-                        collided: false
-                    });
-                }
-
-                npcShips = npcShips.filter(ship => {
-                    if (!ship.alive && ts - ship.explodeAt > 1200) return false;
-                    if (ship.x < -100) return false;
-                    return true;
-                });
-
-                npcShips.forEach(ship => {
-                    if (ship.alive) {
-                        ship.x += ship.vx;
-                        ship.y += ship.vy;
-                        ship.vy += (stable(ship.id, 405) - .5) * .15;
-                        ship.vy = clamp(ship.vy, -2, 2);
-                        ship.y = clamp(ship.y, 20, H - 20);
-
-                        ship.trail.push({x: ship.x, y: ship.y, ts});
-                        if (ship.trail.length > 12) ship.trail.shift();
-
-                        for (let ast of asteroids) {
-                            const dx = ship.x - ast.x;
-                            const dy = ship.y - ast.y;
-                            const dist = Math.hypot(dx, dy);
-                            const shipRadius = Math.max(ship.w, ship.h) / 2 + 5;
-                            if (dist < shipRadius + ast.r + 10 && !ship.collided) {
-                                ship.alive = false;
-                                ship.collided = true;
-                                ship.explodeAt = ts;
-                                createExplosion(ship.x, ship.y, ship.design);
-                            }
-                        }
-                    }
-
-                    drawNPCShip(ship, ts);
-                });
-            }
-
-            function drawNPCShip(ship, ts) {
-                const spriteNames = ['fighter', 'saucer', 'interceptor'];
-                const spriteName = spriteNames[ship.design];
-
-                ctx.save();
-                if (!ship.alive) ctx.globalAlpha = 0.5;
-
-                // Engine glow behind ship
-                const glowColors = ['rgba(255,100,40,0.3)', 'rgba(255,220,40,0.3)', 'rgba(200,100,255,0.3)'];
-                ctx.globalAlpha = 0.3;
-                ctx.fillStyle = glowColors[ship.design];
-                ctx.beginPath();
-                ctx.ellipse(ship.x - 20, ship.y, 15, 12, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1;
-
-                // Motion trail
-                for (let i = 1; i < ship.trail.length; i++) {
-                    const prev = ship.trail[i - 1];
-                    const curr = ship.trail[i];
-                    const age = (ts - curr.ts) / 400;
-                    const a = Math.max(0, 1 - age);
-                    const trailColors = ['rgba(255,100,40,', 'rgba(255,200,100,', 'rgba(200,120,255,'];
-
-                    ctx.strokeStyle = trailColors[ship.design] + (a * .6) + ')';
-                    ctx.lineWidth = 3 + a * 2;
-                    ctx.lineCap = 'round';
-                    ctx.beginPath();
-                    ctx.moveTo(prev.x, prev.y);
-                    ctx.lineTo(curr.x, curr.y);
-                    ctx.stroke();
-                }
-
-                // Draw sprite (scaled up 4x for visibility)
-                const spriteWidths = [48, 48, 56];
-                const spriteHeights = [32, 32, 28];
-                const baseW = spriteWidths[ship.design];
-                const baseH = spriteHeights[ship.design];
-                const scale = 4;
-                const w = baseW * scale;
-                const h = baseH * scale;
-
-                if (spriteImages[spriteName] && spriteImages[spriteName].src) {
-                    ctx.drawImage(spriteImages[spriteName], ship.x - w / 2, ship.y - h / 2, w, h);
-                }
-
-                ctx.restore();
-            }
-
-            function createExplosion(x, y, design) {
-                const particles = [];
-                for (let i = 0; i < 20; i++) {
-                    const angle = (i / 20) * Math.PI * 2;
-                    const speed = 2.5 + stable(i, 500) * 3;
-                    particles.push({
-                        x, y,
+            function flashFalseConfidence(ts) {
+                falseConfidencePhase = 'flash';
+                falseConfidencePhaseStart = ts;
+                const coreX = W * .58;
+                const coreY = H * .49;
+                falseConfidenceRipples = Array.from({ length: 4 }, (_, i) => ({
+                    x: coreX,
+                    y: coreY,
+                    r: 0,
+                    speed: 3 + stable(i, 440) * 3.8,
+                    alpha: .75 - i * .12,
+                    tint: i % 2 === 0 ? 'rgba(88,148,255,' : 'rgba(226,75,74,'
+                }));
+                falseConfidenceShards = Array.from({ length: W < 520 ? 28 : 52 }, (_, i) => {
+                    const angle = stable(i, 441) * Math.PI * 2;
+                    const speed = 1.5 + stable(i, 442) * 5.4;
+                    return {
+                        x: coreX + (stable(i, 443) - .5) * 26,
+                        y: coreY + (stable(i, 444) - .5) * 18,
                         vx: Math.cos(angle) * speed,
                         vy: Math.sin(angle) * speed,
-                        life: 800,
-                        r: 3 + stable(i, 501) * 4
-                    });
-                }
-                explosions.push({x, y, particles, birthTime: 0});
-            }
-
-            function updateAndDrawExplosions(ts) {
-                explosions.forEach(exp => {
-                    exp.particles.forEach(p => {
-                        p.x += p.vx;
-                        p.y += p.vy;
-                        p.vy += .08;
-                        p.life -= 16.67;
-
-                        const lifeRatio = p.life / 800;
-                        const alpha = Math.max(0, lifeRatio);
-                        let hue = 35;
-                        let saturation = 100;
-                        let lightness = 55 + alpha * 35;
-
-                        if (lifeRatio < .3) {
-                            lightness = 50;
-                            hue = 0;
-                        }
-
-                        ctx.fillStyle = `hsla(${hue},${saturation}%,${lightness}%,${alpha * .9})`;
-                        ctx.beginPath();
-                        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                        ctx.fill();
-                    });
-                    exp.particles = exp.particles.filter(p => p.life > 0);
+                        size: 1 + stable(i, 445) * 3.2,
+                        alpha: .45 + stable(i, 446) * .40,
+                        life: 1,
+                        tint: stable(i, 447) > .52 ? 'rgba(250,172,39,' : 'rgba(226,75,74,'
+                    };
                 });
-                explosions = explosions.filter(e => e.particles.length > 0);
+
+                falseConfidenceParticles.forEach((p, i) => {
+                    if (p.type !== 'untested') return;
+                    const angle = Math.atan2(p.y - coreY, p.x - coreX) + (stable(i, 448) - .5) * .6;
+                    const speed = 1.8 + stable(i, 449) * 4.8;
+                    p.ejected = true;
+                    p.ejectVx = Math.cos(angle) * speed;
+                    p.ejectVy = Math.sin(angle) * speed;
+                });
             }
 
-            function updateAndDrawOurShip(ts) {
-                ourShip.x += ourShip.speed;
+            function updateFalseConfidenceScene(ts, dt) {
+                const phaseElapsed = ts - falseConfidencePhaseStart;
+                const collapse = falseConfidencePhase === 'converging'
+                    ? clamp(phaseElapsed / 1280, 0, 1)
+                    : falseConfidencePhase === 'flash' || falseConfidencePhase === 'aftermath'
+                        ? 1
+                        : 0;
+                if (falseConfidencePhase === 'idle' && ts - falseConfidenceLastTrigger > falseConfidenceNextTriggerDelay) {
+                    triggerFalseConfidence(ts);
+                } else if (falseConfidencePhase === 'converging' && phaseElapsed > 1280) {
+                    flashFalseConfidence(ts);
+                } else if (falseConfidencePhase === 'flash' && phaseElapsed > 320) {
+                    falseConfidencePhase = 'aftermath';
+                    falseConfidencePhaseStart = ts;
+                } else if (
+                    falseConfidencePhase === 'aftermath' &&
+                    phaseElapsed > 2200 &&
+                    falseConfidenceRipples.length === 0 &&
+                    falseConfidenceShards.length < 4
+                ) {
+                    falseConfidencePhase = 'idle';
+                    falseConfidencePhaseStart = ts;
+                    falseConfidenceLastTrigger = ts;
+                    falseConfidenceNextTriggerDelay = 2200 + Math.random() * 2200;
+                }
 
-                const lookAhead = 300;
-                let targetY = ourShip.y;
-                let needsAvoidance = false;
-
-                for (let ast of asteroids) {
-                    if (ast.x > ourShip.x && ast.x < ourShip.x + lookAhead) {
-                        const danger = Math.abs(ast.y - ourShip.y);
-                        if (danger < ast.r + 80) {
-                            needsAvoidance = true;
-                            if (ourShip.y > ast.y) {
-                                targetY = Math.min(targetY, ast.y - ast.r - 70);
-                            } else {
-                                targetY = Math.max(targetY, ast.y + ast.r + 70);
-                            }
+                falseConfidenceParticles.forEach((p, i) => {
+                    p.pulse += p.pulseSpeed * dt * .06;
+                    if (p.ejected) {
+                        p.x += p.ejectVx * dt * .06;
+                        p.y += p.ejectVy * dt * .06;
+                        p.ejectVy += .0045 * dt;
+                        p.ejectVx *= .992;
+                        p.ejectVy *= .992;
+                        p.vanish = Math.max(falseConfidencePhase === 'aftermath' ? .18 : 0, p.vanish - .018 * dt * .06);
+                        if (falseConfidencePhase === 'aftermath' && p.vanish <= .22) {
+                            p.ejected = false;
+                            p.vx = p.ejectVx * .18;
+                            p.vy = p.ejectVy * .18;
                         }
+                        p.ignite = Math.max(0, p.ignite - .012 * dt * .06);
+                        return;
                     }
-                }
 
-                targetY = clamp(targetY, 40, H - 40);
+                    if (falseConfidencePhase === 'converging') {
+                        const pull = .020 + stable(i, 450) * .016;
+                        p.x = mix(p.x, p.targetX, pull);
+                        p.y = mix(p.y, p.targetY, pull);
+                        const dx = p.x - p.targetX;
+                        const dy = p.y - p.targetY;
+                        const targetDistance = Math.hypot(dx, dy);
+                        const fieldRadius = Math.min(W, H) * (.08 + collapse * .16);
+                        const targetIgnite = clamp(1 - targetDistance / fieldRadius, 0, 1) * collapse;
+                        p.ignite = mix(p.ignite, targetIgnite, .12 + collapse * .08);
+                    } else {
+                        const driftX = Math.sin(ts * .0007 + p.pulse + i * .04) * (W * .00022);
+                        const driftY = Math.cos(ts * .00055 + p.pulse * 1.2 + i * .03) * (H * .00018);
+                        p.vx += driftX;
+                        p.vy += driftY;
+                        if (falseConfidencePhase === 'aftermath' || falseConfidencePhase === 'idle') {
+                            p.vx += (p.baseX - p.x) * .00022;
+                            p.vy += (p.baseY - p.y) * .00020;
+                            p.vanish = Math.min(1, p.vanish + .012 * dt * .06);
+                        }
+                        p.vx *= .985;
+                        p.vy *= .985;
+                        p.x += p.vx * dt * .06;
+                        p.y += p.vy * dt * .06;
+                        const decay = falseConfidencePhase === 'flash' ? .01 : falseConfidencePhase === 'aftermath' ? .006 : .003;
+                        p.ignite = Math.max(0, p.ignite - decay * dt * .06);
+                    }
 
-                if (!needsAvoidance) {
-                    targetY = H * .5;
-                }
+                    if (p.x < 0 || p.x > W || p.y < 0 || p.y > H) {
+                        falseConfidenceParticles[i] = makeFalseConfidenceParticle(i);
+                    }
+                });
 
-                const dy = targetY - ourShip.y;
-                if (Math.abs(dy) > 2) {
-                    ourShip.vy += dy * .008;
-                } else {
-                    ourShip.vy *= .9;
-                }
-                ourShip.vy = clamp(ourShip.vy, -1.5, 1.5);
-                ourShip.y += ourShip.vy;
-                ourShip.y = clamp(ourShip.y, 40, H - 40);
+                falseConfidenceRipples.forEach(r => {
+                    r.r += r.speed * dt * .06;
+                    r.alpha -= .014 * dt * .06;
+                });
+                falseConfidenceRipples = falseConfidenceRipples.filter(r => r.alpha > 0);
 
-                ourShip.trail.push({x: ourShip.x, y: ourShip.y, ts});
-                if (ourShip.trail.length > 20) ourShip.trail.shift();
-
-                drawOurShip(ts);
+                falseConfidenceShards.forEach(s => {
+                    s.x += s.vx * dt * .06;
+                    s.y += s.vy * dt * .06;
+                    s.vy += .004 * dt;
+                    s.life -= .016 * dt * .06;
+                    s.alpha *= .985;
+                });
+                falseConfidenceShards = falseConfidenceShards.filter(s => s.life > 0 && s.alpha > .04);
             }
 
-            function drawOurShip(ts) {
+            function drawFalseConfidenceField(ts, dt) {
+                if (!falseConfidenceParticles.length) initFalseConfidenceField();
+                updateFalseConfidenceScene(ts, dt);
+
+                ctx.fillStyle = '#060709';
+                ctx.fillRect(0, 0, W, H);
+
+                const coreX = W * .58;
+                const coreY = H * .49;
+                const converging = falseConfidencePhase === 'converging';
+                const flashing = falseConfidencePhase === 'flash';
+                const aftermath = falseConfidencePhase === 'aftermath';
+                const quiet = falseConfidencePhase === 'idle';
+                const collapse = converging ? clamp((ts - falseConfidencePhaseStart) / 1280, 0, 1) : quiet ? 0 : 1;
+                const burst = flashing ? clamp((ts - falseConfidencePhaseStart) / 320, 0, 1) : aftermath ? 1 : 0;
+                const aftermathT = aftermath ? clamp((ts - falseConfidencePhaseStart) / 2200, 0, 1) : 0;
+                const coronaSpin = reduce ? 0 : ts * .00028;
+                const pulseR = 24 + Math.sin(ts * .008) * 6;
+                const warningShift = converging ? Math.pow(collapse, 1.15) : flashing ? 1 : aftermath ? Math.max(.55, 1 - aftermathT * .5) : 0;
+
+                softEllipse(coreX, coreY, W * .34, H * .46, [
+                    [0, `rgba(${Math.round(78 + warningShift * 28)},${Math.round(104 - warningShift * 18)},${Math.round(156 - warningShift * 56)},${0.16 + warningShift * 0.14})`],
+                    [.34, `rgba(${Math.round(34 + warningShift * 22)},${Math.round(48 - warningShift * 12)},${Math.round(82 - warningShift * 34)},${0.08 + warningShift * 0.10})`],
+                    [1, 'rgba(0,0,0,0)']
+                ], .88, -.14);
+                softEllipse(coreX + W * .04, coreY + H * .04, W * .22, H * .22, [
+                    [0, `rgba(${Math.round(102 + warningShift * 68)},${Math.round(44 + warningShift * 12)},${Math.round(48 - warningShift * 10)},${0.10 + warningShift * 0.22})`],
+                    [.46, `rgba(${Math.round(102 + warningShift * 44)},${Math.round(44 + warningShift * 10)},${Math.round(48 - warningShift * 10)},${0.04 + warningShift * 0.10})`],
+                    [1, 'rgba(0,0,0,0)']
+                ], .94, .08);
+                softEllipse(W * .32, H * .62, W * .28, H * .22, [
+                    [0, `rgba(${Math.round(136 + warningShift * 68)},${Math.round(116 + warningShift * 38)},${Math.round(72 - warningShift * 18)},${0.14 + warningShift * 0.16})`],
+                    [.46, `rgba(${Math.round(136 + warningShift * 54)},${Math.round(116 + warningShift * 20)},${Math.round(72 - warningShift * 18)},${0.05 + warningShift * 0.08})`],
+                    [.72, 'rgba(0,0,0,0)'],
+                    [1, 'rgba(0,0,0,0)']
+                ], .76, .03);
+
                 ctx.save();
-
-                // Engine glow behind ship
-                ctx.globalAlpha = 0.4;
-                ctx.fillStyle = 'rgba(100,180,255,0.3)';
-                ctx.beginPath();
-                ctx.ellipse(ourShip.x - 30, ourShip.y, 20, 16, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1;
-
-                // Motion trail
-                for (let i = 1; i < ourShip.trail.length; i++) {
-                    const prev = ourShip.trail[i - 1];
-                    const curr = ourShip.trail[i];
-                    const age = (ts - curr.ts) / 600;
-                    const a = Math.max(0, 1 - age * age);
-
-                    ctx.strokeStyle = `rgba(100,180,255,${a * .6})`;
-                    ctx.lineWidth = 4 + a * 2;
-                    ctx.lineCap = 'round';
+                for (let i = 0; i < 220; i++) {
+                    const seed = stable(i, 600);
+                    const x = W * seed;
+                    const y = H * stable(i, 601);
+                    const density = clamp(1 - Math.hypot((x - coreX) / (W * .42), (y - coreY) / (H * .48)), 0, 1);
+                    const alpha = (.04 + stable(i, 602) * .16) * (.34 + density * .82);
+                    const size = .45 + stable(i, 603) * 2.8;
+                    ctx.fillStyle = stable(i, 604) > .82
+                        ? `rgba(${Math.round(214 + warningShift * 28)},${Math.round(216 - warningShift * 34)},${Math.round(220 - warningShift * 96)},${alpha})`
+                        : stable(i, 605) > .48
+                            ? `rgba(${Math.round(98 + warningShift * 84)},${Math.round(128 - warningShift * 38)},${Math.round(194 - warningShift * 126)},${alpha * (.72 + warningShift * .16)})`
+                            : `rgba(${Math.round(160 + warningShift * 56)},${Math.round(118 + warningShift * 18)},${Math.round(54 - warningShift * 14)},${alpha * .72})`;
                     ctx.beginPath();
-                    ctx.moveTo(prev.x, prev.y);
-                    ctx.lineTo(curr.x, curr.y);
-                    ctx.stroke();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fill();
                 }
-
-                // Draw sprite
-                const scale = 4;
-                if (spriteImages.player && spriteImages.player.src) {
-                    ctx.drawImage(spriteImages.player, ourShip.x - 32 * scale, ourShip.y - 24 * scale, 64 * scale, 48 * scale);
-                }
-
                 ctx.restore();
+
+                ctx.save();
+                falseConfidenceStreams.forEach((stream, i) => {
+                    const drift = ts * .00022 + i * 1.3;
+                    const x = coreX - W * (.11 + stable(i, 620) * .28) + Math.sin(drift) * W * .04;
+                    const y = coreY + (stable(i, 621) - .5) * H * .42 + Math.cos(drift * 1.2) * H * .03;
+                    const alpha = stream.alpha * (converging ? 1.4 + warningShift * .9 : aftermath ? .84 : 1.22);
+                    softEllipse(
+                        x,
+                        y,
+                        W * (.03 + stable(i, 622) * (.055 + warningShift * .018)),
+                        H * (.012 + stable(i, 623) * (.03 + warningShift * .012)),
+                        [
+                            [0, stream.tint === 'blue'
+                                ? `rgba(${Math.round(98 + warningShift * 92)},${Math.round(138 - warningShift * 34)},${Math.round(220 - warningShift * 154)},${alpha})`
+                                : stream.tint === 'amber'
+                                    ? `rgba(${Math.round(186 + warningShift * 28)},${Math.round(138 + warningShift * 14)},${Math.round(58 - warningShift * 12)},${alpha * .88})`
+                                    : `rgba(${Math.round(164 + warningShift * 36)},${Math.round(174 - warningShift * 12)},${Math.round(200 - warningShift * 64)},${alpha * .72})`],
+                            [.46, stream.tint === 'blue'
+                                ? `rgba(${Math.round(98 + warningShift * 92)},${Math.round(138 - warningShift * 34)},${Math.round(220 - warningShift * 154)},${alpha * (.22 + warningShift * .10)})`
+                                : stream.tint === 'amber'
+                                    ? `rgba(${Math.round(186 + warningShift * 28)},${Math.round(138 + warningShift * 14)},${Math.round(58 - warningShift * 12)},${alpha * (.18 + warningShift * .08)})`
+                                    : `rgba(${Math.round(164 + warningShift * 36)},${Math.round(174 - warningShift * 12)},${Math.round(200 - warningShift * 64)},${alpha * (.12 + warningShift * .06)})`],
+                            [1, 'rgba(0,0,0,0)']
+                        ],
+                        .92,
+                        -.26 + Math.sin(drift) * .24
+                    );
+                });
+                ctx.restore();
+
+                const coreRx = W * (.055 + collapse * .034);
+                const coreRy = H * (.074 + collapse * .042);
+                softEllipse(coreX, coreY, coreRx * 1.55, coreRy * 1.38, [
+                    [0, `rgba(${Math.round(182 + warningShift * 40)},${Math.round(112 + warningShift * 16)},${Math.round(84 - warningShift * 18)},${.10 + collapse * .18})`],
+                    [.42, `rgba(${Math.round(132 + warningShift * 72)},${Math.round(54 + warningShift * 24)},${Math.round(42 - warningShift * 10)},${.08 + collapse * .12})`],
+                    [1, 'rgba(0,0,0,0)']
+                ], .9, -.12);
+
+                softEllipse(coreX, coreY, coreRx * 1.12, coreRy * 1.04, [
+                    [0, `rgba(${Math.round(242 + warningShift * 8)},${Math.round(224 - warningShift * 34)},${Math.round(176 - warningShift * 94)},${.18 + collapse * .24})`],
+                    [.34, `rgba(${Math.round(220 + warningShift * 18)},${Math.round(148 - warningShift * 14)},${Math.round(82 - warningShift * 18)},${.14 + collapse * .18})`],
+                    [.72, `rgba(${Math.round(124 + warningShift * 88)},${Math.round(48 + warningShift * 22)},${Math.round(40 - warningShift * 8)},${.10 + burst * .14})`],
+                    [1, 'rgba(0,0,0,0)']
+                ], .98, -.08);
+
+                softEllipse(coreX + coreRx * .08, coreY - coreRy * .12, coreRx * .66, coreRy * .54, [
+                    [0, `rgba(${Math.round(246 + warningShift * 6)},${Math.round(234 - warningShift * 34)},${Math.round(196 - warningShift * 102)},${.12 + warningShift * .14})`],
+                    [.48, `rgba(${Math.round(222 + warningShift * 14)},${Math.round(144 - warningShift * 10)},${Math.round(84 - warningShift * 18)},${.07 + warningShift * .08})`],
+                    [1, 'rgba(0,0,0,0)']
+                ], .94, -.28);
+
+                softEllipse(coreX - coreRx * .12, coreY + coreRy * .08, coreRx * .74, coreRy * .62, [
+                    [0, `rgba(${Math.round(116 + warningShift * 86)},${Math.round(146 - warningShift * 36)},${Math.round(224 - warningShift * 164)},${.08 + warningShift * .12})`],
+                    [.48, `rgba(${Math.round(116 + warningShift * 86)},${Math.round(146 - warningShift * 36)},${Math.round(224 - warningShift * 164)},${.03 + warningShift * .06})`],
+                    [1, 'rgba(0,0,0,0)']
+                ], .9, -.18);
+
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                for (let i = 0; i < 18; i++) {
+                    const orbit = W * (.022 + i * .006) * (1 + collapse * .14);
+                    const angle = coronaSpin * (1 + i * .03) + i * .72;
+                    const x = coreX + Math.cos(angle) * orbit * 1.34;
+                    const y = coreY + Math.sin(angle * 1.2) * orbit * .72;
+                    const alpha = .10 + collapse * .14 - i * .004;
+                    ctx.fillStyle = i % 3 === 0
+                        ? `rgba(${Math.round(156 + warningShift * 90)},${Math.round(118 - warningShift * 24)},${Math.round(196 - warningShift * 104)},${Math.max(.02, alpha)})`
+                        : i % 2 === 0
+                            ? `rgba(${Math.round(172 + warningShift * 70)},${Math.round(156 - warningShift * 18)},${Math.round(116 - warningShift * 44)},${Math.max(.02, alpha * .94)})`
+                            : `rgba(${Math.round(116 + warningShift * 108)},${Math.round(146 - warningShift * 42)},${Math.round(224 - warningShift * 160)},${Math.max(.02, alpha * .88)})`;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 1.8 + stable(i, 611) * 3.6, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+
+                const coreAlpha = converging ? .18 + collapse * .34 : flashing ? .56 : .34;
+                softEllipse(coreX - coreRx * .08, coreY + coreRy * .06, pulseR * (.10 + collapse * .03), pulseR * (.18 + collapse * .05), [
+                    [0, `rgba(${Math.round(120 + warningShift * 70)},${Math.round(56 + warningShift * 26)},${Math.round(46 - warningShift * 8)},${.16 + coreAlpha * .24})`],
+                    [.44, `rgba(${Math.round(84 + warningShift * 56)},${Math.round(34 + warningShift * 18)},${Math.round(30 - warningShift * 6)},${.10 + coreAlpha * .12})`],
+                    [1, 'rgba(0,0,0,0)']
+                ], .92, .16);
+
+                softEllipse(coreX + coreRx * .02, coreY - coreRy * .04, pulseR * (.18 + collapse * .07), pulseR * (.24 + collapse * .08), [
+                    [0, `rgba(${Math.round(242 + warningShift * 10)},${Math.round(228 - warningShift * 42)},${Math.round(182 - warningShift * 98)},${.08 + coreAlpha * .12})`],
+                    [.36, `rgba(${Math.round(218 + warningShift * 22)},${Math.round(136 - warningShift * 10)},${Math.round(76 - warningShift * 18)},${.07 + coreAlpha * .10})`],
+                    [1, 'rgba(0,0,0,0)']
+                ], .86, -.28);
+
+                softEllipse(coreX + W * .01, coreY - H * .01, W * .10, H * .13, [
+                    [0, `rgba(${Math.round(228 + warningShift * 20)},${Math.round(198 - warningShift * 20)},${Math.round(122 - warningShift * 30)},${.20 + warningShift * .16})`],
+                    [.42, `rgba(${Math.round(228 + warningShift * 20)},${Math.round(198 - warningShift * 20)},${Math.round(122 - warningShift * 30)},${.08 + warningShift * .10})`],
+                    [1, 'rgba(0,0,0,0)']
+                ], .92, -.18);
+                softEllipse(coreX - W * .01, coreY + H * .01, W * .14, H * .18, [
+                    [0, `rgba(${Math.round(116 + warningShift * 86)},${Math.round(146 - warningShift * 36)},${Math.round(224 - warningShift * 164)},${.12 + warningShift * .16})`],
+                    [.48, `rgba(${Math.round(116 + warningShift * 86)},${Math.round(146 - warningShift * 36)},${Math.round(224 - warningShift * 164)},${.04 + warningShift * .08})`],
+                    [1, 'rgba(0,0,0,0)']
+                ], .88, -.12);
+
+                falseConfidenceParticles.forEach(p => {
+                    const pulse = .74 + Math.sin(p.pulse) * .26;
+                    const alpha = p.alpha * pulse * p.vanish;
+                    const ignite = clamp(p.ignite, 0, 1);
+                    const color = p.type === 'present'
+                        ? `rgba(${Math.round(126 + ignite * 128)},${Math.round(158 - ignite * 56)},${Math.round(228 - ignite * 176)},${alpha})`
+                        : `rgba(${Math.round(190 + ignite * 46)},${Math.round(198 - ignite * 28)},${Math.round(214 - ignite * 112)},${alpha * .82})`;
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size * (1 + ignite * .16), 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                if (flashing || aftermath) {
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'lighter';
+                    for (let i = 0; i < 22; i++) {
+                        const fan = stable(i, 630);
+                        const angle = -0.58 + fan * 1.12 + (stable(i, 631) - .5) * .08;
+                        const distance = W * (.10 + fan * .24) * (flashing ? 1.05 : 1.14 + aftermathT * .16);
+                        const x = coreX + Math.cos(angle) * distance;
+                        const y = coreY + Math.sin(angle) * distance * .74;
+                        const tint = fan > .68 ? 'rgba(230,98,84,' : fan > .34 ? 'rgba(208,156,78,' : 'rgba(114,138,202,';
+                        const alpha = flashing ? .18 + (1 - fan) * .18 : (.08 + (1 - fan) * .12) * (1 - aftermathT * .38);
+                        softEllipse(
+                            x,
+                            y,
+                            W * (.018 + stable(i, 632) * .06),
+                            H * (.006 + stable(i, 633) * .02),
+                            [
+                                [0, `${tint}${alpha})`],
+                                [.42, `${tint}${alpha * .28})`],
+                                [1, 'rgba(0,0,0,0)']
+                            ],
+                            .96,
+                            angle
+                        );
+                    }
+                    ctx.restore();
+                }
+
+                falseConfidenceRipples.forEach(r => {
+                    ctx.strokeStyle = `${r.tint}${Math.max(0, r.alpha)})`;
+                    ctx.lineWidth = 1.6;
+                    ctx.beginPath();
+                    ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
+                    ctx.stroke();
+                });
+
+                falseConfidenceShards.forEach(s => {
+                    ctx.fillStyle = `${s.tint}${s.alpha})`;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                if (flashing) {
+                    const flash = Math.max(.10, 1 - (ts - falseConfidencePhaseStart) / 240);
+                    ctx.fillStyle = `rgba(230,84,66,${flash * .28})`;
+                    ctx.fillRect(0, 0, W, H);
+                }
+
+                if (aftermath || flashing) {
+                    ctx.fillStyle = `rgba(244,184,76,${aftermath ? .34 : .74})`;
+                    ctx.beginPath();
+                    ctx.arc(coreX, coreY, 8 + burst * 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             }
 
             function render(ts, dt) {
@@ -4812,8 +5207,7 @@
                     return;
                 }
                 if (stage === 3) {
-                    drawAsteroidField(ts, 1);
-                    drawSignal();
+                    drawFalseConfidenceField(ts, dt);
                     return;
                 }
                 drawBase();
@@ -4857,7 +5251,6 @@
             window.problemAdmissibilitySetStage = nextStage => {
                 stage = clamp(nextStage, 0, 3);
                 signal = 1;
-                if (stage === 3) initAsteroidField();
                 resize();
             };
 
@@ -4937,16 +5330,18 @@
                     countUp(el, +el.dataset.target, el.dataset.suffix, 0, 0);
                 });
             } else {
-                new IntersectionObserver(entries => {
+                const evidenceObserver = new IntersectionObserver(entries => {
                     entries.forEach(e => {
                         if (e.isIntersecting) {
                             e.target.classList.add('vis');
                             e.target.querySelectorAll('.count-val').forEach((el, i) => {
                                 countUp(el, +el.dataset.target, el.dataset.suffix, 1800, i * 100);
                             });
+                            evidenceObserver.unobserve(e.target);
                         }
                     });
-                }, { threshold: .15 }).observe(evidenceSection);
+                }, { threshold: .15 });
+                evidenceObserver.observe(evidenceSection);
             }
         }
 
